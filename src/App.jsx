@@ -558,6 +558,13 @@ function ApplicationCard({ application, selected, onSelect, onEdit, onDelete }) 
         <span>{application.priority} priority</span>
         <span>Updated {formatDate(application.updatedAt)}</span>
       </div>
+      <p className="card-description">
+        {application.description || "No job description saved yet."}
+      </p>
+      <div className="card-links">
+        <ExternalLink href={application.sourceUrl}>Source</ExternalLink>
+        <ExternalLink href={application.applicationUrl}>Application</ExternalLink>
+      </div>
       <div className="card-actions">
         <button className="ghost" type="button" onClick={onEdit}>
           Edit

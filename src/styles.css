@@ -280,6 +280,29 @@ textarea:focus {
   margin: 10px 0 12px;
 }
 
+.card-description {
+  display: -webkit-box;
+  margin: 0 0 12px;
+  overflow: hidden;
+  color: #3e4542;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.card-links a,
+.card-links .disabled-link {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 0.88rem;
+}
+
 .status {
   display: inline-flex;
   min-width: 96px;
