@@ -24,15 +24,9 @@ const emptyForm = {
   company: "",
   title: "",
   status: "Wishlist",
-  location: "",
-  workType: "Remote",
   priority: "Medium",
-  salary: "",
   sourceUrl: "",
   applicationUrl: "",
-  contactName: "",
-  contactEmail: "",
-  followUpDate: "",
   description: "",
   notes: "",
 };
@@ -43,15 +37,9 @@ const demoApplications = [
     company: "Northstar Labs",
     title: "Frontend Engineer",
     status: "Interviewing",
-    location: "Remote",
-    workType: "Remote",
     priority: "High",
-    salary: "$120k - $145k",
     sourceUrl: "https://linkedin.com",
     applicationUrl: "https://example.com/jobs/frontend-engineer",
-    contactName: "Maya Chen",
-    contactEmail: "maya@example.com",
-    followUpDate: getDateOffset(2),
     description: "React role focused on internal product dashboards and design systems.",
     notes: "Prepare examples of complex UI work and performance improvements.",
     createdAt: getDateOffset(-5, true),
@@ -67,15 +55,9 @@ const demoApplications = [
     company: "Atlas Health",
     title: "Product Designer",
     status: "Applied",
-    location: "New York, NY",
-    workType: "Hybrid",
     priority: "Medium",
-    salary: "",
     sourceUrl: "https://wellfound.com",
     applicationUrl: "",
-    contactName: "",
-    contactEmail: "",
-    followUpDate: getDateOffset(5),
     description: "Designer role for patient-facing workflows.",
     notes: "Ask about research cadence and product team structure.",
     createdAt: getDateOffset(-2, true),
@@ -148,10 +130,8 @@ export default function App() {
         const searchable = [
           application.company,
           application.title,
-          application.location,
           application.description,
           application.notes,
-          application.contactName,
         ]
           .join(" ")
           .toLowerCase();
@@ -172,13 +152,11 @@ export default function App() {
     const interviews = applications.filter(
       (application) => application.status === "Interviewing",
     ).length;
-    const followUps = applications.filter((application) => {
-      if (!application.followUpDate) return false;
-      const today = new Date().toISOString().slice(0, 10);
-      return application.followUpDate <= today && !["Rejected", "Archived"].includes(application.status);
-    }).length;
+    const offers = applications.filter(
+      (application) => application.status === "Offer",
+    ).length;
 
-    return { active, interviews, followUps, total: applications.length };
+    return { active, interviews, offers, total: applications.length };
   }, [applications]);
 
   function persist(nextApplications) {
@@ -245,15 +223,9 @@ export default function App() {
       company: application.company,
       title: application.title,
       status: application.status,
-      location: application.location,
-      workType: application.workType,
       priority: application.priority,
-      salary: application.salary,
       sourceUrl: application.sourceUrl,
       applicationUrl: application.applicationUrl,
-      contactName: application.contactName,
-      contactEmail: application.contactEmail,
-      followUpDate: application.followUpDate,
       description: application.description,
       notes: application.notes,
     });
@@ -335,7 +307,7 @@ export default function App() {
       <section className="metrics" aria-label="Application summary">
         <Metric label="Active" value={metrics.active} />
         <Metric label="Interviewing" value={metrics.interviews} />
-        <Metric label="Follow-ups due" value={metrics.followUps} />
+        <Metric label="Offers" value={metrics.offers} />
         <Metric label="Total saved" value={metrics.total} />
       </section>
 
@@ -390,38 +362,6 @@ export default function App() {
                 <option>Low</option>
               </select>
             </Field>
-            <Field label="Location">
-              <input
-                value={form.location}
-                onChange={(event) => updateForm("location", event.target.value)}
-                placeholder="Berlin, Remote, London"
-              />
-            </Field>
-            <Field label="Work type">
-              <select
-                value={form.workType}
-                onChange={(event) => updateForm("workType", event.target.value)}
-              >
-                <option>Remote</option>
-                <option>Hybrid</option>
-                <option>On-site</option>
-                <option>Flexible</option>
-              </select>
-            </Field>
-            <Field label="Salary range">
-              <input
-                value={form.salary}
-                onChange={(event) => updateForm("salary", event.target.value)}
-                placeholder="$90k - $120k"
-              />
-            </Field>
-            <Field label="Follow-up date">
-              <input
-                type="date"
-                value={form.followUpDate}
-                onChange={(event) => updateForm("followUpDate", event.target.value)}
-              />
-            </Field>
             <Field label="Source link">
               <input
                 type="url"
@@ -436,21 +376,6 @@ export default function App() {
                 value={form.applicationUrl}
                 onChange={(event) => updateForm("applicationUrl", event.target.value)}
                 placeholder="https://company.com/jobs/..."
-              />
-            </Field>
-            <Field label="Contact name">
-              <input
-                value={form.contactName}
-                onChange={(event) => updateForm("contactName", event.target.value)}
-                placeholder="Recruiter or referral"
-              />
-            </Field>
-            <Field label="Contact email">
-              <input
-                type="email"
-                value={form.contactEmail}
-                onChange={(event) => updateForm("contactEmail", event.target.value)}
-                placeholder="name@company.com"
               />
             </Field>
           </div>
@@ -554,7 +479,6 @@ function ApplicationCard({ application, selected, onSelect, onEdit, onDelete }) 
         <StatusPill status={application.status} />
       </button>
       <div className="card-meta">
-        <span>{application.location || "Location not set"}</span>
         <span>{application.priority} priority</span>
         <span>Updated {formatDate(application.updatedAt)}</span>
       </div>
@@ -602,11 +526,7 @@ function ApplicationDetails({ application, onActivity }) {
 
       <div className="detail-grid">
         <Detail label="Status" value={<StatusPill status={application.status} />} />
-        <Detail label="Location" value={application.location || "Not set"} />
-        <Detail label="Work type" value={application.workType || "Not set"} />
         <Detail label="Priority" value={application.priority || "Not set"} />
-        <Detail label="Salary" value={application.salary || "Not set"} />
-        <Detail label="Follow-up" value={formatDate(application.followUpDate)} />
         <Detail label="Created" value={formatDateTime(application.createdAt)} />
         <Detail label="Status changed" value={formatDateTime(application.statusChangedAt)} />
       </div>
@@ -614,9 +534,6 @@ function ApplicationDetails({ application, onActivity }) {
       <div className="links-row">
         <ExternalLink href={application.sourceUrl}>Source link</ExternalLink>
         <ExternalLink href={application.applicationUrl}>Application link</ExternalLink>
-        {application.contactEmail && (
-          <a href={`mailto:${application.contactEmail}`}>Email {application.contactName || "contact"}</a>
-        )}
       </div>
 
       <div className="text-columns">
